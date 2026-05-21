@@ -25,6 +25,7 @@
     "recipient_email": "EMAIL_ADRESS",
     "imap_enabled": true,
     "imtp_port": 993,
+    "imap_server": "imap.qq.com",
     "sender_name": "[Horizon] ",
     "subscribe_keyword": "SUBSCRIBE",
     "unsubscribe_keyword": "UNSUBSCRIBE"
