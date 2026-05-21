@@ -4,7 +4,7 @@
     "provider": "deepseek",
     "model": "deepseek-ai/DeepSeek-V3.2",
     "base_url": "OPENAI_BASE_URL",
-    "api_key_env": "DEEPSEEK_API_KEY",
+    "api_key_env": "OPENAI_API_KEY",
     "temperature": 0.3,
     "max_tokens": 8192,
     "languages": [
