@@ -24,7 +24,7 @@
     "sender_name": "Horizon Daily",
     "recipient_email": "${EMAIL_ADDRESS}",
     "imap_enabled": true,
-    "imtp_port": 993,
+    "imap_port": 993,
     "imap_server": "imap.qq.com",
     "subscribe_keyword": "SUBSCRIBE",
     "unsubscribe_keyword": "UNSUBSCRIBE"
