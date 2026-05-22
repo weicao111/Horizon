@@ -155,16 +155,30 @@ class EmailManager:
         if not self.config.enabled or not subscribers:
             return
 
-        safe_summary = html.escape(summary_md)
+        clean_summary = summary_md
+
+        # 把邮件里不太兼容的 details 折叠块改成普通标题
+        clean_summary = clean_summary.replace("<details><summary>参考链接</summary>", "\n\n### 参考链接\n\n")
+        clean_summary = clean_summary.replace("</details>", "")
+        clean_summary = clean_summary.replace("<ul>", "")
+        clean_summary = clean_summary.replace("</ul>", "")
+
+        # 把 HTML 列表链接转成 Markdown 链接
+        import re
+        clean_summary = re.sub(
+            r'<li><a href="([^"]+)">([^<]+)</a></li>',
+            r'- [\2](\1)',
+            clean_summary,
+        )
 
         if markdown:
             html_content = markdown.markdown(
-                safe_summary,
+                clean_summary,
                 extensions=["extra", "fenced_code", "tables", "nl2br"],
                 output_format="html5",
             )
         else:
-            html_content = f"<pre>{safe_summary}</pre>"
+            html_content = f"<pre>{html.escape(clean_summary)}</pre>"
 
         html_body = f"""
 <html>
