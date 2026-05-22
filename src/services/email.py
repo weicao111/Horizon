@@ -156,11 +156,15 @@ class EmailManager:
             return
 
         safe_summary = html.escape(summary_md)
-        html_content = (
-            markdown.markdown(safe_summary)
-            if markdown
-            else f"<pre>{safe_summary}</pre>"
-        )
+html_content = (
+    markdown.markdown(
+        safe_summary,
+        extensions=["extra", "fenced_code", "tables", "nl2br"],
+        output_format="html5",
+    )
+    if markdown
+    else f"<pre>{safe_summary}</pre>"
+)
 
         html_body = f"""
         <!DOCTYPE html>
