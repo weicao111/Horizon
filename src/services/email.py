@@ -150,45 +150,33 @@ class EmailManager:
         except Exception as e:
             logger.error(f"Error checking subscriptions: {e}")
 
-    def send_daily_summary(self, summary_md: str, subject: str, subscribers: List[str]):
+def send_daily_summary(self, summary_md: str, subject: str, subscribers: List[str]):
         """Sends the daily summary to all subscribers."""
         if not self.config.enabled or not subscribers:
             return
 
         safe_summary = html.escape(summary_md)
-html_content = (
-    markdown.markdown(
-        safe_summary,
-        extensions=["extra", "fenced_code", "tables", "nl2br"],
-        output_format="html5",
-    )
-    if markdown
-    else f"<pre>{safe_summary}</pre>"
-)
+
+        if markdown:
+            html_content = markdown.markdown(
+                safe_summary,
+                extensions=["extra", "fenced_code", "tables", "nl2br"],
+                output_format="html5",
+            )
+        else:
+            html_content = f"<pre>{safe_summary}</pre>"
 
         html_body = f"""
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body {{ font-family: sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }}
-                h1, h2, h3 {{ color: #2c3e50; }}
-                code {{ background-color: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: monospace; }}
-                pre {{ background-color: #f4f4f4; padding: 15px; border-radius: 5px; overflow-x: auto; }}
-                blockquote {{ border-left: 4px solid #ddd; padding-left: 15px; color: #777; }}
-                .footer {{ margin-top: 40px; font-size: 12px; color: #888; text-align: center; border-top: 1px solid #eee; padding-top: 20px; }}
-            </style>
-        </head>
-        <body>
-            {html_content}
-            <div class="footer">
-                <p>Sent by {self.config.sender_name}</p>
-                <p>To unsubscribe, please reply with "{self.config.unsubscribe_keyword}"</p>
-            </div>
-        </body>
-        </html>
-        """
+<html>
+<body>
+{html_content}
+
+<hr>
+<p>Sent by {self.config.sender_name}</p>
+<p>To unsubscribe, please reply with "{self.config.unsubscribe_keyword}"</p>
+</body>
+</html>
+"""
 
         try:
             with smtplib.SMTP_SSL(
@@ -197,7 +185,6 @@ html_content = (
                 server.login(
                     self.config.smtp_username or self.config.email_address, self.pwd
                 )
-
                 for subscriber in subscribers:
                     msg = MIMEMultipart("alternative")
                     msg["Subject"] = subject
@@ -206,8 +193,8 @@ html_content = (
                     )
                     msg["To"] = subscriber
 
-                    text_part = MIMEText(summary_md, "plain")
-                    html_part = MIMEText(html_body, "html")
+                    text_part = MIMEText(summary_md, "plain", "utf-8")
+                    html_part = MIMEText(html_body, "html", "utf-8")
 
                     msg.attach(text_part)
                     msg.attach(html_part)
@@ -217,25 +204,5 @@ html_content = (
                         logger.info(f"Sent summary to {subscriber}")
                     except Exception as e:
                         logger.error(f"Failed to send to {subscriber}: {e}")
-
         except Exception as e:
             logger.error(f"SMTP Error: {e}")
-
-    def _send_reply(self, to_email: str, subject: str, body: str):
-        """Helper to send a simple reply."""
-        try:
-            with smtplib.SMTP_SSL(
-                self.config.smtp_server, self.config.smtp_port
-            ) as server:
-                server.login(
-                    self.config.smtp_username or self.config.email_address, self.pwd
-                )
-
-                msg = MIMEText(body)
-                msg["Subject"] = subject
-                msg["From"] = f"{self.config.sender_name} <{self.config.email_address}>"
-                msg["To"] = to_email
-
-                server.send_message(msg)
-        except Exception as e:
-            logger.error(f"Failed to send reply to {to_email}: {e}")
