@@ -2,8 +2,9 @@ name: Daily Horizon Summary
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: '0 0 */2 * *'
+  schedule:
+    - cron: "8 8 * * *"
+      timezone: "Asia/China"
 
 jobs:
   daily-summary:
@@ -54,7 +55,7 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        run: uv run horizon --hours 48
+        run: uv run horizon --hours 24
 
       - name: Set current date as environment variable
         run: echo "DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
